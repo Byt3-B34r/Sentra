@@ -1,0 +1,95 @@
+<svg viewBox="0 0 880 620" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif,system-ui,sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <style>
+      .box{fill:#fff;stroke:#334155;stroke-width:1.5;rx:8}
+      .lbl{font-size:13px;fill:#0f172a;font-weight:600}
+      .sub{font-size:11px;fill:#475569}
+      .grp{fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;stroke-dasharray:4 3}
+      .grplbl{font-size:11px;fill:#64748b;font-weight:700;letter-spacing:.05em}
+      .edge{stroke:#475569;stroke-width:1.5;fill:none;marker-end:url(#arrow)}
+      .agent{fill:#eef2ff;stroke:#4f46e5;stroke-width:1.5}
+      .obs{fill:#ecfdf5;stroke:#059669;stroke-width:1.5}
+    </style>
+  </defs>
+
+  <text x="24" y="30" font-size="18" font-weight="800" fill="#0f172a">SENTRA — Agentic SOC Triage Pipeline</text>
+  <text x="24" y="48" font-size="12" fill="#64748b">Air-gap capable · local LLM inference · multi-source telemetry → analyst-ready incidents</text>
+
+  <!-- Ingest -->
+  <rect class="grp" x="20" y="70" width="200" height="150" rx="10"/>
+  <text class="grplbl" x="34" y="90">INGEST</text>
+  <rect class="box" x="36" y="100" width="168" height="34" rx="6"/>
+  <text class="lbl" x="48" y="115">auth.log normalizer</text>
+  <text class="sub" x="48" y="128">SSH · sudo · invalid-user</text>
+  <rect class="box" x="36" y="142" width="168" height="34" rx="6"/>
+  <text class="lbl" x="48" y="157">Zeek conn/notice</text>
+  <text class="sub" x="48" y="170">TSV flow + IDS alerts</text>
+  <rect class="box" x="36" y="184" width="168" height="28" rx="6"/>
+  <text class="lbl" x="48" y="202">→ Common Event Schema</text>
+
+  <!-- Agent graph -->
+  <rect class="grp" x="260" y="70" width="340" height="320" rx="10"/>
+  <text class="grplbl" x="274" y="90">AGENT GRAPH  (LangGraph · llama3.1:8b)</text>
+
+  <rect class="agent box" x="300" y="104" width="260" height="56" rx="8"/>
+  <text class="lbl" x="316" y="126">1 · Triage</text>
+  <text class="sub" x="316" y="142">heuristic pre-filter + batched LLM</text>
+  <text class="sub" x="316" y="155">runs on ALL events · cheap</text>
+
+  <rect class="agent box" x="300" y="190" width="260" height="70" rx="8"/>
+  <text class="lbl" x="316" y="212">2 · Analyst</text>
+  <text class="sub" x="316" y="228">correlate → cluster by indicator</text>
+  <text class="sub" x="316" y="242">RAG over ATT&amp;CK (LlamaIndex)</text>
+  <text class="sub" x="316" y="255">runs on ESCALATED only · expensive</text>
+
+  <rect class="agent box" x="300" y="290" width="260" height="56" rx="8"/>
+  <text class="lbl" x="316" y="312">3 · Summarizer</text>
+  <text class="sub" x="316" y="328">LLM narrative + deterministic render</text>
+  <text class="sub" x="316" y="341">→ IncidentReport (JSON + Markdown)</text>
+
+  <!-- internal edges -->
+  <path class="edge" d="M430,160 L430,190"/>
+  <text class="sub" x="438" y="178">escalated</text>
+  <path class="edge" d="M430,260 L430,290"/>
+
+  <!-- RAG KB -->
+  <rect class="box" x="620" y="190" width="150" height="70" rx="8"/>
+  <text class="lbl" x="634" y="212">ATT&amp;CK KB</text>
+  <text class="sub" x="634" y="228">curated technique docs</text>
+  <text class="sub" x="634" y="242">nomic-embed-text</text>
+  <text class="sub" x="634" y="255">(keyword fallback in CI)</text>
+  <path class="edge" d="M620,225 L562,225"/>
+
+  <!-- API -->
+  <rect class="box" x="260" y="410" width="340" height="46" rx="8"/>
+  <text class="lbl" x="276" y="430">FastAPI service</text>
+  <text class="sub" x="276" y="446">POST /v1/analyze · /healthz · /metrics</text>
+  <path class="edge" d="M430,390 L430,410"/>
+  <path class="edge" d="M220,150 L300,135"/>
+
+  <!-- Observability -->
+  <rect class="grp" x="620" y="410" width="240" height="120" rx="10"/>
+  <text class="grplbl" x="634" y="430">OBSERVABILITY</text>
+  <rect class="obs box" x="636" y="440" width="100" height="44" rx="6"/>
+  <text class="lbl" x="648" y="460">Prometheus</text>
+  <text class="sub" x="648" y="475">scrape /metrics</text>
+  <rect class="obs box" x="748" y="440" width="96" height="44" rx="6"/>
+  <text class="lbl" x="760" y="460">Grafana</text>
+  <text class="sub" x="760" y="475">dashboards</text>
+  <text class="sub" x="636" y="504">per-node latency · token throughput</text>
+  <text class="sub" x="636" y="518">triage suppression rate · pipeline p95</text>
+  <path class="edge" d="M600,433 L636,455"/>
+
+  <!-- Deploy footer -->
+  <rect class="grp" x="20" y="240" width="200" height="150" rx="10"/>
+  <text class="grplbl" x="34" y="260">DEPLOY &amp; CI</text>
+  <text class="sub" x="34" y="282">• Containerfile (non-root)</text>
+  <text class="sub" x="34" y="300">• compose: full stack up</text>
+  <text class="sub" x="34" y="318">• k8s manifests + probes</text>
+  <text class="sub" x="34" y="336">• GitLab CI: lint→test→</text>
+  <text class="sub" x="34" y="352">  build→Trivy scan</text>
+  <text class="sub" x="34" y="370">• 18 tests · 81% coverage</text>
+</svg>

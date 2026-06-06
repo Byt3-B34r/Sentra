@@ -1,0 +1,91 @@
+# Brings up the full SENTRA stack with one command:
+#   podman compose up      (or: docker compose up)
+#
+# Services:
+#   ollama     - local LLM inference (air-gap capable; no external calls)
+#   model-init - pulls the chat + embedding models once, then exits
+#   sentra-api - the FastAPI pipeline service
+#   prometheus - scrapes sentra-api /metrics
+#   grafana    - dashboards (auto-provisioned)
+#
+# On Apple Silicon, Ollama uses the Metal GPU on the host; run Ollama natively
+# and point OLLAMA_HOST at host.containers.internal if you prefer host inference.
+
+services:
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    container_name: sentra-ollama
+    volumes:
+      - ollama-models:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: pull the models the agents and RAG need, then exit 0.
+  model-init:
+    image: docker.io/ollama/ollama:latest
+    container_name: sentra-model-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "ollama pull llama3.1:8b && ollama pull nomic-embed-text && echo 'models ready'"
+    restart: "no"
+
+  sentra-api:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: sentra:0.1.0
+    container_name: sentra-api
+    depends_on:
+      model-init:
+        condition: service_completed_successfully
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+      SENTRA_MODEL: "llama3.1:8b"
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import httpx,sys; sys.exit(0 if httpx.get('http://localhost:8000/healthz').text=='ok' else 1)\""]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    container_name: sentra-prometheus
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - sentra-api
+
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: sentra-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./observability/grafana/dashboard-provider.yml:/etc/grafana/provisioning/dashboards/provider.yml:ro
+      - ./observability/grafana/sentra-dashboard.json:/etc/grafana/provisioning/dashboards/sentra-dashboard.json:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  ollama-models:

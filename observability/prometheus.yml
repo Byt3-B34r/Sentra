@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: sentra
+    metrics_path: /metrics
+    static_configs:
+      # Service name resolves on the compose/k8s network.
+      - targets: ["sentra-api:8000"]
+        labels:
+          service: sentra

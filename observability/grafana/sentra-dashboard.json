@@ -1,0 +1,107 @@
+{
+  "title": "SENTRA — Pipeline & Inference Observability",
+  "uid": "sentra-main",
+  "schemaVersion": 39,
+  "tags": ["sentra", "soc", "llm"],
+  "time": { "from": "now-15m", "to": "now" },
+  "refresh": "5s",
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Events Ingested",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(sentra_events_ingested_total)", "legendFormat": "ingested" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Escalated vs Suppressed",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        { "expr": "sum(sentra_events_escalated_total)", "legendFormat": "escalated" },
+        { "expr": "sum(sentra_events_suppressed_total)", "legendFormat": "suppressed" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Triage Suppression Rate",
+      "description": "Fraction of events triage spared from expensive analysis. The cost-control lever.",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percentunit" } },
+      "targets": [
+        {
+          "expr": "sum(sentra_events_suppressed_total) / clamp_min(sum(sentra_events_ingested_total), 1)",
+          "legendFormat": "suppressed %"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Incidents (by severity)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        { "expr": "sum by (severity) (sentra_incidents_total)", "legendFormat": "{{severity}}" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "LLM Latency p95 by Node (s)",
+      "description": "Where inference time is spent across the agent graph.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, node) (rate(sentra_llm_latency_seconds_bucket[1m])))",
+          "legendFormat": "{{node}} p95"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Token Throughput by Node",
+      "description": "Prompt + completion tokens per second, attributed per agent.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum by (node) (rate(sentra_llm_prompt_tokens_total[1m]))",
+          "legendFormat": "{{node}} prompt"
+        },
+        {
+          "expr": "sum by (node) (rate(sentra_llm_completion_tokens_total[1m]))",
+          "legendFormat": "{{node}} completion"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "LLM Calls by Node",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "sum by (node) (rate(sentra_llm_calls_total[1m]))",
+          "legendFormat": "{{node}}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "End-to-End Pipeline Latency p95 (s)",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(sentra_pipeline_latency_seconds_bucket[1m])))",
+          "legendFormat": "pipeline p95"
+        }
+      ]
+    }
+  ]
+}

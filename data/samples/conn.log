@@ -1,0 +1,14 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	conn
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	proto	service	duration	conn_state
+#types	time	string	addr	port	addr	port	enum	string	interval	string
+1780459811.0	CnZ1ag7	10.0.0.5	49210	10.0.0.20	22	tcp	ssh	302.4	SF
+1780459918.0	CnZ1aa1	203.0.113.7	51200	10.0.0.20	22	tcp	ssh	0.51	REJ
+1780459919.0	CnZ1ab2	203.0.113.7	51210	10.0.0.20	22	tcp	ssh	0.49	REJ
+1780459921.0	CnZ1ac3	203.0.113.7	51221	10.0.0.20	22	tcp	ssh	0.50	REJ
+1780459923.0	CnZ1ad4	203.0.113.7	51232	10.0.0.20	22	tcp	ssh	0.48	REJ
+1780459935.0	CnZ1ae5	203.0.113.7	51280	10.0.0.20	22	tcp	ssh	18.20	SF
+1780459951.0	CnZ1af6	10.0.0.20	44120	198.51.100.66	80	tcp	http	2.10	SF

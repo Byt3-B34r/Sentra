@@ -1,0 +1,58 @@
+[
+  {
+    "technique_id": "T1595.001",
+    "technique_name": "Active Scanning: Scanning IP Blocks",
+    "tactic": "Reconnaissance",
+    "summary": "Adversaries probe ranges of IP addresses to discover live hosts and open services before an intrusion. Repeated short-lived connection attempts to the same port across many source ports, or rejected connections to closed services, are typical network-layer indicators.",
+    "indicators": "Bursts of REJ/rejected TCP connections from one source, many distinct source ports targeting a single service port, low-duration flows."
+  },
+  {
+    "technique_id": "T1110.001",
+    "technique_name": "Brute Force: Password Guessing",
+    "tactic": "Credential Access",
+    "summary": "Adversaries attempt to gain access by guessing passwords against a service such as SSH, trying many username and password combinations in rapid succession. A burst of failed authentications from a single source, often cycling through common or invalid usernames, is the signature.",
+    "indicators": "Multiple 'Failed password' events from one source IP, attempts against invalid users (admin, test, oracle), high failure rate over a short window, optionally followed by a success."
+  },
+  {
+    "technique_id": "T1110.003",
+    "technique_name": "Brute Force: Password Spraying",
+    "tactic": "Credential Access",
+    "summary": "Rather than many passwords against one account, the adversary tries a few common passwords across many accounts to evade lockout. Distinguished from password guessing by breadth of usernames and low per-account attempt counts.",
+    "indicators": "Failed auth spread across many distinct usernames from one source, low attempts per account."
+  },
+  {
+    "technique_id": "T1078",
+    "technique_name": "Valid Accounts",
+    "tactic": "Defense Evasion / Persistence / Privilege Escalation / Initial Access",
+    "summary": "Adversaries use legitimate credentials to authenticate, blending in with normal activity. When a successful login immediately follows a burst of failures from the same source, it strongly suggests a brute-forced credential is now being used as a valid account.",
+    "indicators": "Successful authentication from a source that was just failing repeatedly; access at unusual times; subsequent actions inconsistent with the account's normal behavior."
+  },
+  {
+    "technique_id": "T1059.004",
+    "technique_name": "Command and Scripting Interpreter: Unix Shell",
+    "tactic": "Execution",
+    "summary": "Adversaries abuse Unix shells (sh, bash) to execute commands and scripts after gaining access. A common pattern is fetching a remote script and piping it directly into a shell interpreter, executing attacker-controlled code without writing an inspectable file first.",
+    "indicators": "Shell invocations such as 'curl http://.../x.sh | sh' or 'wget -qO- ... | bash', execution shortly after a successful login."
+  },
+  {
+    "technique_id": "T1548.003",
+    "technique_name": "Abuse Elevation Control Mechanism: Sudo and Sudo Caching",
+    "tactic": "Privilege Escalation",
+    "summary": "Adversaries use sudo to run commands with elevated privileges. When a freshly accessed account invokes sudo to run a shell that downloads and executes remote code, it indicates an attacker escalating privileges to establish control.",
+    "indicators": "sudo COMMAND entries running shells or fetch-and-execute one-liners, escalation by an account that just authenticated from a suspicious source."
+  },
+  {
+    "technique_id": "T1071.001",
+    "technique_name": "Application Layer Protocol: Web Protocols",
+    "tactic": "Command and Control",
+    "summary": "Adversaries communicate with command-and-control infrastructure over HTTP/HTTPS to blend with normal web traffic. Outbound connections to previously unseen external hosts immediately after compromise often represent payload retrieval or C2 check-in.",
+    "indicators": "Outbound HTTP from an internal host to an unfamiliar external IP shortly after a successful intrusion, especially following remote-script execution."
+  },
+  {
+    "technique_id": "T1105",
+    "technique_name": "Ingress Tool Transfer",
+    "tactic": "Command and Control",
+    "summary": "Adversaries transfer tools or payloads from an external system into a compromised environment, commonly using curl or wget to pull a script or binary. Frequently paired with shell execution to immediately run the fetched payload.",
+    "indicators": "curl/wget to an external host pulling a script or binary, outbound flow to that host correlating with a local execution event."
+  }
+]

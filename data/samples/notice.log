@@ -1,0 +1,9 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	notice
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	note	msg	src	dst
+#types	time	string	addr	port	addr	port	enum	string	addr	addr
+1780459923.0	CnZ1ad4	203.0.113.7	51232	10.0.0.20	22	SSH::Password_Guessing	203.0.113.7 appears to be guessing SSH passwords (8 failed attempts)	203.0.113.7	10.0.0.20
+1780459951.0	-	10.0.0.20	44120	198.51.100.66	80	Suspicious::Outbound	Outbound HTTP to suspicious host shortly after successful SSH auth	10.0.0.20	198.51.100.66
